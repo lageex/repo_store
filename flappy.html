@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird R.E.P.O. | Официальный магазин</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-bg: #0d0d0d;
+            --secondary-bg: #1a1a1a;
+            --accent: #ff6a00;
+            --accent-light: #ff8c00;
+            --accent-dark: #cc5500;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --flappy-orange: #e67e22;
+            --flappy-pipe: #2ecc71;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: var(--main-bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 106, 0, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 106, 0, 0.03) 0%, transparent 20%);
+            background-attachment: fixed;
+        }
+        
+        /* HEADER */
+        header {
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+        
+        .logo-img {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 32px;
+            box-shadow: 0 0 15px var(--accent);
+            color: #000;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-img:hover {
+            transform: scale(1.1);
+        }
+        
+        .rusty-logo {
+            position: relative;
+            display: inline-block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--accent);
+        }
+        
+        .rusty-logo::before {
+            content: 'R.E.P.O.';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            overflow: hidden;
+            color: var(--accent);
+            background: linear-gradient(45deg, 
+                var(--accent-dark), 
+                var(--accent-light), 
+                #e74c3c, 
+                var(--accent-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .rusty-logo::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,255,255,0.8), 
+                transparent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a.active {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent);
+        }
+        
+        .back-button {
+            background: var(--flappy-orange);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--flappy-orange);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        /* GAME CONTAINER */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(230, 126, 34, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(230, 126, 34, 0.05) 0%, transparent 30%);
+            z-index: -1;
+        }
+        
+        .game-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--flappy-orange);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px var(--flappy-orange);
+            position: relative;
+        }
+        
+        .game-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: var(--flappy-orange);
+            border-radius: 3px;
+        }
+        
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        /* GAME BOARD */
+        .game-board-container {
+            position: relative;
+            width: 320px;
+            height: 480px;
+            border: 3px solid var(--flappy-orange);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #1a1a1a;
+            box-shadow: 0 0 30px rgba(230, 126, 34, 0.3);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* GAME INFO */
+        .game-info-panel {
+            background: rgba(26, 26, 26, 0.7);
+            border: 2px solid var(--flappy-orange);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(230, 126, 34, 0.2);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            min-width: 250px;
+        }
+        
+        .info-title {
+            font-size: 1.5rem;
+            color: var(--flappy-orange);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-value {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+        
+        .highscore-value {
+            color: var(--flappy-orange);
+            text-shadow: 0 0 10px var(--flappy-orange);
+        }
+        
+        /* CONTROLS */
+        .controls-panel {
+            background: rgba(26, 26, 26, 0.7);
+            border: 2px solid var(--flappy-orange);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(230, 126, 34, 0.2);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-width: 250px;
+        }
+        
+        .controls-title {
+            font-size: 1.5rem;
+            color: var(--flappy-orange);
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .controls-list {
+            list-style: none;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-key {
+            background: var(--secondary-bg);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            border: 1px solid var(--accent);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: var(--flappy-orange);
+            color: #000;
+            border: none;
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--flappy-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        /* GAME OVER */
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .game-over.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .game-over h2 {
+            font-size: 2.5rem;
+            color: var(--danger);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px var(--danger);
+            text-transform: uppercase;
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+        
+        .score-display {
+            font-size: 2rem;
+            color: var(--flappy-orange);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px var(--flappy-orange);
+        }
+        
+        .highscore-display {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .restart-button {
+            background: var(--flappy-orange);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--flappy-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 250px;
+        }
+        
+        .restart-button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 25px var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        /* START SCREEN */
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        
+        .start-screen h2 {
+            font-size: 2.5rem;
+            color: var(--flappy-orange);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px var(--flappy-orange);
+            text-transform: uppercase;
+        }
+        
+        .start-button {
+            background: var(--flappy-orange);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--flappy-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .start-button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 25px var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        /* MOBILE CONTROLS */
+        .mobile-controls {
+            display: none;
+            width: 100%;
+            max-width: 320px;
+            margin-top: 1rem;
+        }
+        
+        .mobile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--flappy-orange);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        .mobile-btn:active {
+            background: var(--flappy-orange);
+            color: #000;
+            transform: scale(0.98);
+        }
+        
+        /* ANIMATIONS */
+        @keyframes fly {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(-10deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-5px) rotate(10deg); }
+        }
+        
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 992px) {
+            .game-content {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .game-subtitle {
+                font-size: 1rem;
+            }
+            
+            .game-board-container {
+                width: 280px;
+                height: 420px;
+            }
+            
+            .mobile-controls {
+                display: flex;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .game-board-container {
+                width: 260px;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <a href="index.html" class="logo">
+            <div class="logo-img">😈</div>
+            <div class="rusty-logo">R.E.P.O.</div>
+        </a>
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="games.html">Игры</a></li>
+                <li><a href="purchases.html">Корзина</a></li>
+            </ul>
+        </nav>
+        <button class="back-button" onclick="window.location.href='games.html'">
+            <i class="fas fa-arrow-left"></i> Назад
+        </button>
+    </header>
+
+    <!-- GAME CONTAINER -->
+    <section class="game-container">
+        <h1 class="game-title">Flappy Bird R.E.P.O.</h1>
+        <p class="game-subtitle">Пролети через ржавые трубы и выполни квоту! Осторожно - монстры не дремлют!</p>
+        
+        <div class="game-content">
+            <!-- GAME BOARD -->
+            <div class="game-board-container">
+                <canvas id="gameCanvas"></canvas>
+                
+                <!-- START SCREEN -->
+                <div class="start-screen" id="startScreen">
+                    <h2>Flappy R.E.P.O.</h2>
+                    <button class="start-button" id="startButton">
+                        <i class="fas fa-play"></i> Начать игру
+                    </button>
+                </div>
+                
+                <!-- GAME OVER SCREEN -->
+                <div class="game-over" id="gameOver">
+                    <h2>ИГРА ОКОНЧЕНА</h2>
+                    <p class="score-display" id="finalScore">0</p>
+                    <p class="highscore-display">Рекорд: <span id="highscoreDisplay">0</span></p>
+                    <button class="restart-button" id="restartButton">
+                        <i class="fas fa-redo"></i> Играть снова
+                    </button>
+                </div>
+            </div>
+            
+            <!-- GAME INFO -->
+            <div class="game-info-panel">
+                <h3 class="info-title">Текущий счёт</h3>
+                <div class="info-value" id="scoreDisplay">0</div>
+                
+                <h3 class="info-title">Рекорд</h3>
+                <div class="info-value highscore-value" id="highscoreValue">0</div>
+            </div>
+            
+            <!-- CONTROLS -->
+            <div class="controls-panel">
+                <h3 class="controls-title">Управление</h3>
+                <ul class="controls-list">
+                    <li class="control-item">
+                        <span>Прыжок</span>
+                        <span class="control-key">Пробел</span>
+                    </li>
+                    <li class="control-item">
+                        <span>Прыжок</span>
+                        <span class="control-key">Клик</span>
+                    </li>
+                    <li class="control-item">
+                        <span>Перезапуск</span>
+                        <span class="control-key">R</span>
+                    </li>
+                </ul>
+                
+                <div class="action-buttons">
+                    <button class="action-btn" id="newGameBtn">
+                        <i class="fas fa-plus-circle"></i> Новая игра
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MOBILE CONTROLS -->
+        <div class="mobile-controls">
+            <div class="mobile-btn" id="jumpBtn">
+                <i class="fas fa-arrow-up"></i> Прыжок
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game elements
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const highscoreValue = document.getElementById('highscoreValue');
+            const highscoreDisplay = document.getElementById('highscoreDisplay');
+            const finalScore = document.getElementById('finalScore');
+            const startScreen = document.getElementById('startScreen');
+            const startButton = document.getElementById('startButton');
+            const gameOverScreen = document.getElementById('gameOver');
+            const restartButton = document.getElementById('restartButton');
+            const newGameBtn = document.getElementById('newGameBtn');
+            const jumpBtn = document.getElementById('jumpBtn');
+        
+            // Game variables
+            const GRAVITY = 0.2;
+            const JUMP_FORCE = -6;
+            const PIPE_WIDTH = 60;
+            const PIPE_GAP = 150;
+            const PIPE_SPEED = 1.5;
+            const PIPE_FREQUENCY = 1500;
+            
+            let bird = {
+                x: 100,
+                y: canvas.height / 2,
+                width: 40,
+                height: 30,
+                velocity: 0,
+                gravity: GRAVITY,
+                jumpForce: JUMP_FORCE,
+                color: '#e67e22'
+            };
+            
+            let pipes = [];
+            let score = 0;
+            let highscore = 0;
+            let gameRunning = false;
+            let gameOver = false;
+            let animationId;
+            let lastPipeTime = 0;
+            let backgroundOffset = 0;
+            
+            function resizeCanvas() {
+                const container = document.querySelector('.game-board-container');
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                bird.y = canvas.height / 2;
+            }
+            
+            function init() {
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                highscore = localStorage.getItem('flappyHighscore') || 0;
+                highscoreValue.textContent = highscore;
+                highscoreDisplay.textContent = highscore;
+                
+                startButton.addEventListener('click', startGame);
+                restartButton.addEventListener('click', startGame);
+                newGameBtn.addEventListener('click', startGame);
+                jumpBtn.addEventListener('click', jump);
+                
+                // ИСПРАВЛЕННЫЙ ОБРАБОТЧИК КЛАВИШ
+                document.addEventListener('keydown', (e) => {
+                    if (gameOver) {
+                        if (e.key === 'r' || e.key === 'R') {
+                            startGame();
+                        }
+                        return;
+                    }
+                    
+                    if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        jump();
+                    }
+                });
+                
+                canvas.addEventListener('click', () => {
+                    if (gameRunning) jump();
+                });
+                
+                drawStartScreen();
+            }
+            
+            function startGame() {
+                bird.y = canvas.height / 2;
+                bird.velocity = 0;
+                pipes = [];
+                score = 0;
+                gameRunning = true;
+                gameOver = false;
+                lastPipeTime = 0;
+                
+                scoreDisplay.textContent = score;
+                startScreen.style.display = 'none';
+                gameOverScreen.classList.remove('active');
+                
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                gameLoop();
+            }
+            
+            function gameLoop(timestamp) {
+                if (!gameRunning) return;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBackground();
+                updateBird();
+                drawBird();
+                
+                if (timestamp - lastPipeTime > PIPE_FREQUENCY) {
+                    generatePipe();
+                    lastPipeTime = timestamp;
+                }
+                
+                updatePipes();
+                drawPipes();
+                
+                if (checkCollisions()) {
+                    endGame();
+                    return;
+                }
+                
+                animationId = requestAnimationFrame(gameLoop);
+            }
+            
+            function drawStartScreen() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#e67e22';
+                ctx.font = 'bold 36px Rajdhani';
+                ctx.textAlign = 'center';
+                ctx.fillText('FLAPPY R.E.P.O.', canvas.width / 2, canvas.height / 2 - 30);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '18px Rajdhani';
+                ctx.fillText('Нажмите "Начать игру"', canvas.width / 2, canvas.height / 2 + 20);
+            }
+            
+            function drawBackground() {
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.lineWidth = 1;
+                
+                for (let y = 0; y < canvas.height; y += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y + backgroundOffset % 20);
+                    ctx.lineTo(canvas.width, y + backgroundOffset % 20);
+                    ctx.stroke();
+                }
+                
+                for (let x = 0; x < canvas.width; x += 20) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + backgroundOffset % 20, 0);
+                    ctx.lineTo(x + backgroundOffset % 20, canvas.height);
+                    ctx.stroke();
+                }
+                
+                backgroundOffset += 0.5;
+            }
+            
+            function updateBird() {
+                bird.velocity += bird.gravity;
+                bird.y += bird.velocity * 0.8;
+                
+                if (bird.y < 0) {
+                    bird.y = 0;
+                    bird.velocity = 0;
+                }
+                
+                if (bird.y + bird.height > canvas.height) {
+                    bird.y = canvas.height - bird.height;
+                    bird.velocity = 0;
+                }
+            }
+            
+            function drawBird() {
+                ctx.save();
+                
+                const rotation = Math.min(Math.max(bird.velocity * 3, -30), 30);
+                ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
+                ctx.rotate(rotation * Math.PI / 180);
+                
+                ctx.fillStyle = bird.color;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, bird.width / 2, bird.height / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(10, -5, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#ffcc00';
+                ctx.beginPath();
+                ctx.moveTo(bird.width / 2 - 5, 0);
+                ctx.lineTo(bird.width / 2 + 10, -5);
+                ctx.lineTo(bird.width / 2 + 10, 5);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.restore();
+            }
+            
+            function jump() {
+                if (!gameRunning || gameOver) return;
+                bird.velocity = bird.jumpForce;
+            }
+            
+            function generatePipe() {
+                const gapPosition = Math.random() * (canvas.height - PIPE_GAP - 100) + 50;
+                
+                pipes.push({
+                    x: canvas.width,
+                    width: PIPE_WIDTH,
+                    gapY: gapPosition,
+                    gapHeight: PIPE_GAP,
+                    color: '#2ecc71',
+                    passed: false
+                });
+            }
+            
+            function updatePipes() {
+                for (let i = pipes.length - 1; i >= 0; i--) {
+                    pipes[i].x -= PIPE_SPEED;
+                    
+                    if (!pipes[i].passed && pipes[i].x + pipes[i].width < bird.x) {
+                        pipes[i].passed = true;
+                        score++;
+                        scoreDisplay.textContent = score;
+                        
+                        if (score > highscore) {
+                            highscore = score;
+                            highscoreValue.textContent = highscore;
+                            highscoreDisplay.textContent = highscore;
+                            localStorage.setItem('flappyHighscore', highscore);
+                        }
+                    }
+                    
+                    if (pipes[i].x + pipes[i].width < 0) {
+                        pipes.splice(i, 1);
+                    }
+                }
+            }
+            
+            function drawPipes() {
+                for (const pipe of pipes) {
+                    ctx.fillStyle = pipe.color;
+                    ctx.fillRect(pipe.x, 0, pipe.width, pipe.gapY);
+                    ctx.fillRect(
+                        pipe.x, 
+                        pipe.gapY + pipe.gapHeight, 
+                        pipe.width, 
+                        canvas.height - pipe.gapY - pipe.gapHeight
+                    );
+                    
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.fillRect(pipe.x - 2, pipe.gapY - 5, pipe.width + 4, 5);
+                    ctx.fillRect(pipe.x - 2, pipe.gapY + pipe.gapHeight, pipe.width + 4, 5);
+                }
+            }
+            
+            function checkCollisions() {
+                if (bird.y <= 0 || bird.y + bird.height >= canvas.height) {
+                    return true;
+                }
+                
+                for (const pipe of pipes) {
+                    if (
+                        bird.x + bird.width > pipe.x && 
+                        bird.x < pipe.x + pipe.width && 
+                        (bird.y < pipe.gapY || bird.y + bird.height > pipe.gapY + pipe.gapHeight)
+                    ) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            function endGame() {
+                gameRunning = false;
+                gameOver = true;
+                cancelAnimationFrame(animationId);
+                finalScore.textContent = score;
+                gameOverScreen.classList.add('active');
+            }
+            
+            init();
+        });
+        </script>
+</body>
+</html>

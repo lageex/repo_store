@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle Jump - R.E.P.O. Edition</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-bg: #0d0d0d;
+            --secondary-bg: #1a1a1a;
+            --accent: #ff6a00;
+            --accent-light: #ff8c00;
+            --accent-dark: #cc5500;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --robot-red: #ff3b3b;
+            --doodle-blue: #3498db;
+            --monster-purple: #9b59b6;
+            --platform-green: #2ecc71;
+            --score-gold: #f1c40f;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: var(--main-bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 106, 0, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 106, 0, 0.03) 0%, transparent 20%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+        
+        /* HEADER */
+        header {
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+            flex-shrink: 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            box-shadow: 0 0 10px var(--accent);
+            color: #000;
+            transition: transform 0.3s ease;
+        }
+        
+        .rusty-logo {
+            position: relative;
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px var(--accent);
+        }
+        
+        .rusty-logo::before {
+            content: 'R.E.P.O.';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            overflow: hidden;
+            color: var(--accent);
+            background: linear-gradient(45deg, 
+                var(--accent-dark), 
+                var(--accent-light), 
+                #e74c3c, 
+                var(--accent-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .rusty-logo::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,255,255,0.8), 
+                transparent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 0.8rem;
+        }
+        
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a.active {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 10px var(--accent);
+        }
+        
+        /* GAME CONTAINER */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+            overflow-y: auto;
+            width: 100%;
+        }
+        
+        .game-header {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .score-display {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--score-gold);
+            text-shadow: 0 0 8px rgba(241, 196, 15, 0.5);
+            white-space: nowrap;
+        }
+        
+        .quota-display {
+            font-size: 1rem;
+            background: rgba(52, 152, 219, 0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 30px;
+            border: 1px solid var(--doodle-blue);
+            white-space: nowrap;
+        }
+        
+        .quota-display span {
+            color: var(--doodle-blue);
+            font-weight: bold;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--accent);
+            background: var(--accent-light);
+        }
+        
+        /* GAME CANVAS */
+        #gameCanvas {
+            background: linear-gradient(to bottom, #0c1a25, #0d0d0d);
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 20px rgba(255, 106, 0, 0.3);
+            max-width: 100%;
+            max-height: 70vh;
+            aspect-ratio: 9/16;
+            position: relative;
+        }
+        
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(13, 13, 13, 0.9);
+            z-index: 100;
+            padding: 1.5rem;
+            text-align: center;
+            overflow-y: auto;
+        }
+        
+        .game-title {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text);
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px var(--accent);
+            animation: glow 3s infinite alternate;
+        }
+        
+        .game-title span {
+            color: var(--accent);
+        }
+        
+        .instructions {
+            font-size: 0.9rem;
+            max-width: 90%;
+            margin: 0 auto 1.5rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .monster-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1.5rem 0;
+            max-width: 100%;
+        }
+        
+        .monster-item {
+            background: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100px;
+            border: 1px solid var(--monster-purple);
+        }
+        
+        .monster-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+            color: var(--monster-purple);
+        }
+        
+        .monster-name {
+            font-size: 0.8rem;
+            color: var(--text);
+        }
+        
+        .start-btn {
+            background: var(--doodle-blue);
+            color: #000;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--doodle-blue);
+            margin-top: 0.8rem;
+        }
+        
+        .start-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px var(--doodle-blue);
+            background: #2980b9;
+        }
+        
+        /* FOOTER */
+        footer {
+            background: #070707;
+            padding: 1rem;
+            margin-top: auto;
+            border-top: 1px solid var(--accent);
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        
+        /* ANIMATIONS */
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 8px rgba(255, 106, 0, 0.5);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(255, 106, 0, 0.8), 0 0 40px rgba(255, 106, 0, 0.6);
+            }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 600px) {
+            header {
+                padding: 0.6rem 1rem;
+            }
+            
+            .logo-img {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+            
+            .rusty-logo {
+                font-size: 1rem;
+            }
+            
+            nav ul {
+                gap: 0.5rem;
+            }
+            
+            nav a {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.6rem;
+            }
+            
+            .game-title {
+                font-size: 1.8rem;
+            }
+            
+            .instructions {
+                font-size: 0.8rem;
+            }
+            
+            .monster-item {
+                width: 80px;
+                padding: 0.6rem;
+            }
+            
+            .monster-icon {
+                font-size: 1.2rem;
+            }
+            
+            .btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+            
+            .start-btn {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .game-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .monster-gallery {
+                gap: 0.5rem;
+            }
+            
+            .monster-item {
+                width: 70px;
+                padding: 0.5rem;
+            }
+            
+            .monster-name {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <a href="games.html" class="logo">
+            <div class="logo-img">😈</div>
+            <div class="rusty-logo">R.E.P.O.</div>
+        </a>
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="games.html">Игры</a></li>
+                <li><a href="doodle.html" class="active">Doodle Jump</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- GAME CONTAINER -->
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score-display">
+                <i class="fas fa-coins"></i> Счет: <span id="score">0</span>
+            </div>
+            <div class="quota-display">
+                Квота: <span id="quota">0</span> / 10000
+            </div>
+            <div class="controls">
+                <button class="btn" id="restartBtn">
+                    <i class="fas fa-redo"></i> Заново
+                </button>
+                <button class="btn" id="pauseBtn">
+                    <i class="fas fa-pause"></i> Пауза
+                </button>
+            </div>
+        </div>
+        
+        <div id="gameWrapper" style="position: relative;">
+            <canvas id="gameCanvas" width="360" height="640"></canvas>
+            
+            <!-- START SCREEN -->
+            <div class="game-overlay" id="startScreen">
+                <h1 class="game-title">Doodle <span>Jump</span></h1>
+                <p class="instructions">
+                    Вы - робот R.E.P.O., собирающий ценные предметы в заброшенных домах. 
+                    Прыгайте по платформам, собирайте ценности для квоты и избегайте монстров!
+                </p>
+                
+                <div class="monster-gallery">
+                    <div class="monster-item">
+                        <div class="monster-icon">👴</div>
+                        <div class="monster-name">Голова деда</div>
+                    </div>
+                    <div class="monster-item">
+                        <div class="monster-icon">🦆</div>
+                        <div class="monster-name">Злая утка</div>
+                    </div>
+                    <div class="monster-item">
+                        <div class="monster-icon">🤡</div>
+                        <div class="monster-name">Клоун</div>
+                    </div>
+                    <div class="monster-item">
+                        <div class="monster-icon">👻</div>
+                        <div class="monster-name">Тень</div>
+                    </div>
+                </div>
+                
+                <p class="instructions">
+                    <strong>Управление:</strong> Используйте ← → или A D для движения.<br>
+                    На мобильных: касайтесь левой/правой части экрана.
+                </p>
+                
+                <button class="start-btn" id="startBtn">
+                    <i class="fas fa-play"></i> НАЧАТЬ ИГРУ
+                </button>
+            </div>
+            
+            <!-- GAME OVER SCREEN -->
+            <div class="game-overlay" id="gameOverScreen" style="display: none;">
+                <h1 class="game-title">Игра <span>Окончена</span></h1>
+                <p class="instructions">
+                    Вы собрали: <span id="finalScore" style="color: var(--score-gold); font-weight: bold;">0</span> ценных предметов<br>
+                    Квота выполнена на: <span id="quotaPercent" style="color: var(--doodle-blue); font-weight: bold;">0%</span>
+                </p>
+                <p class="instructions" id="gameOverMessage">
+                    Монстры R.E.P.O. оказались сильнее...
+                </p>
+                <button class="start-btn" id="restartGameBtn">
+                    <i class="fas fa-redo"></i> ИГРАТЬ СНОВА
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Основные переменные игры
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const startBtn = document.getElementById('startBtn');
+        const restartGameBtn = document.getElementById('restartGameBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const scoreDisplay = document.getElementById('score');
+        const quotaDisplay = document.getElementById('quota');
+        const finalScore = document.getElementById('finalScore');
+        const quotaPercent = document.getElementById('quotaPercent');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        
+        // Размеры canvas
+        let canvasWidth = canvas.width;
+        let canvasHeight = canvas.height;
+        
+        // Переменные игры
+        let gameRunning = false;
+        let gamePaused = false;
+        let score = 0;
+        let quotaValue = 0;
+        let highestPoint = 0;
+        let player;
+        let platforms = [];
+        let monsters = [];
+        let items = [];
+        let keys = {};
+        let touchStartX = 0;
+        let gameSpeed = 3;
+        let scrollOffset = 0;
+        let backgroundOffset = 0;
+        let cameraOffset = 0;
+        
+        // Класс игрока (робота)
+        class Player {
+            constructor() {
+                this.width = 40;
+                this.height = 50;
+                this.x = canvasWidth / 2 - this.width / 2;
+                this.y = canvasHeight - 150;
+                this.velocityX = 0;
+                this.velocityY = 0;
+                this.gravity = 0.5;
+                this.jumpForce = -12;
+                this.isJumping = false;
+                this.direction = 1; // 1 - вправо, -1 - влево
+            }
+            
+            update() {
+                // Применяем гравитацию
+                this.velocityY += this.gravity;
+                this.y += this.velocityY;
+                
+                // Движение влево/вправо
+                this.x += this.velocityX;
+                
+                // Ограничение движения по горизонтали
+                if (this.x < 0) this.x = canvasWidth - this.width;
+                if (this.x > canvasWidth - this.width) this.x = 0;
+                
+                // Проверка на выход за нижнюю границу
+                if (this.y > canvasHeight + cameraOffset) {
+                    gameOver();
+                }
+                
+                // Обновление высоты
+                if (this.y < highestPoint) {
+                    highestPoint = this.y;
+                    
+                    // Добавляем очки за высоту
+                    const points = Math.floor((canvasHeight - this.y + cameraOffset) / 10);
+                    if (points > score) {
+                        score = points;
+                        scoreDisplay.textContent = score;
+                    }
+                }
+                
+                // Камера следует за игроком, когда он поднимается
+                if (this.y < canvasHeight / 2 + cameraOffset) {
+                    cameraOffset = this.y - canvasHeight / 2;
+                }
+            }
+            
+            draw() {
+                // Рисуем робота
+                ctx.fillStyle = '#3498db';
+                ctx.fillRect(this.x, this.y - cameraOffset, this.width, this.height);
+                
+                // Голова робота
+                ctx.fillStyle = '#2980b9';
+                ctx.fillRect(this.x + 5, this.y - cameraOffset, this.width - 10, 15);
+                
+                // Глаза
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(this.x + 15, this.y + 8 - cameraOffset, 4, 0, Math.PI * 2);
+                ctx.arc(this.x + this.width - 15, this.y + 8 - cameraOffset, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Тело
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(this.x + 5, this.y + 15 - cameraOffset, this.width - 10, 25);
+                
+                // Ноги
+                ctx.fillStyle = '#3498db';
+                ctx.fillRect(this.x, this.y + this.height - 10 - cameraOffset, 10, 10);
+                ctx.fillRect(this.x + this.width - 10, this.y + this.height - 10 - cameraOffset, 10, 10);
+            }
+            
+            jump() {
+                this.velocityY = this.jumpForce;
+                this.isJumping = true;
+            }
+        }
+        
+        // Класс платформ
+        class Platform {
+            constructor(x, y, width) {
+                this.x = x;
+                this.y = y;
+                this.width = width || 70;
+                this.height = 15;
+                this.color = '#2ecc71';
+                this.collected = false;
+            }
+            
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y - cameraOffset, this.width, this.height);
+                
+                // Текстура платформы
+                ctx.fillStyle = '#27ae60';
+                for (let i = 5; i < this.width; i += 15) {
+                    ctx.fillRect(this.x + i, this.y - cameraOffset, 5, this.height);
+                }
+            }
+        }
+        
+        // Класс предметов для сбора
+        class Item {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 20;
+                this.height = 20;
+                this.value = Math.floor(Math.random() * 100) + 50;
+                this.collected = false;
+            }
+            
+            draw() {
+                ctx.fillStyle = '#f1c40f';
+                ctx.beginPath();
+                ctx.arc(this.x + this.width/2, this.y + this.height/2 - cameraOffset, this.width/2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#000';
+                ctx.font = "12px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("$", this.x + this.width/2, this.y + this.height/2 + 4 - cameraOffset);
+            }
+        }
+        
+        // Класс монстров
+        class Monster {
+            constructor(type, x, y) {
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.width = 40;
+                this.height = 40;
+                this.velocityX = (Math.random() - 0.5) * 4;
+                this.velocityY = 0;
+            }
+            
+            update() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                
+                // Отскок от краев
+                if (this.x < 0 || this.x > canvasWidth - this.width) {
+                    this.velocityX *= -1;
+                }
+            }
+            
+            draw() {
+                ctx.fillStyle = '#9b59b6';
+                
+                switch(this.type) {
+                    case 'grandpa':
+                        // Летающая голова деда
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width/2, this.y + this.height/2 - cameraOffset, this.width/2, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.fillStyle = '#fff';
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width/2 - 8, this.y + this.height/2 - 5 - cameraOffset, 5, 0, Math.PI * 2);
+                        ctx.arc(this.x + this.width/2 + 8, this.y + this.height/2 - 5 - cameraOffset, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.fillStyle = '#000';
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width/2 - 8, this.y + this.height/2 - 5 - cameraOffset, 2, 0, Math.PI * 2);
+                        ctx.arc(this.x + this.width/2 + 8, this.y + this.height/2 - 5 - cameraOffset, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Рот
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width/2, this.y + this.height/2 + 5 - cameraOffset, 6, 0, Math.PI);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        break;
+                        
+                    case 'duck':
+                        // Злая утка
+                        ctx.fillStyle = '#ff9f1a';
+                        ctx.beginPath();
+                        ctx.ellipse(this.x + this.width/2, this.y + this.height/2 - cameraOffset, this.width/2, this.height/2.5, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Клюв
+                        ctx.fillStyle = '#ff6b35';
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + this.width/2, this.y + this.height/2 - cameraOffset);
+                        ctx.lineTo(this.x + this.width/2 + 15, this.y + this.height/2 - cameraOffset);
+                        ctx.lineTo(this.x + this.width/2, this.y + this.height/2 + 10 - cameraOffset);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        // Глаза
+                        ctx.fillStyle = '#000';
+                        ctx.beginPath();
+                        ctx.arc(this.x + this.width/2 - 5, this.y + this.height/2 - 5 - cameraOffset, 3, 0, Math.PI * 2);
+                        ctx.arc(this.x + this.width/2 + 5, this.y + this.height/2 - 5 - cameraOffset, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                }
+            }
+        }
+        
+        // Инициализация игры
+        function initGame() {
+            player = new Player();
+            platforms = [];
+            monsters = [];
+            items = [];
+            score = 0;
+            quotaValue = 0;
+            highestPoint = canvasHeight;
+            scrollOffset = 0;
+            gameSpeed = 3;
+            cameraOffset = 0;
+            
+            // Создаем начальные платформы
+            // Всегда добавляем платформу под игроком
+            platforms.push(new Platform(canvasWidth / 2 - 35, canvasHeight - 100));
+            
+            for (let i = 1; i < 10; i++) {
+                const x = Math.random() * (canvasWidth - 70);
+                const y = canvasHeight - i * 80 - 50;
+                platforms.push(new Platform(x, y));
+                
+                // Добавляем предметы на некоторые платформы
+                if (Math.random() > 0.7) {
+                    items.push(new Item(x + 25, y - 30));
+                }
+            }
+            
+            // Добавляем монстров
+            monsters.push(new Monster('grandpa', 50, 200));
+            monsters.push(new Monster('duck', canvasWidth - 100, 400));
+            
+            scoreDisplay.textContent = score;
+            quotaDisplay.textContent = quotaValue;
+        }
+        
+        // Проверка коллизий
+        function checkCollisions() {
+            // Коллизии с платформами
+            platforms.forEach(platform => {
+                if (
+                    player.y + player.height >= platform.y &&
+                    player.y + player.height <= platform.y + platform.height &&
+                    player.x + player.width > platform.x &&
+                    player.x < platform.x + platform.width &&
+                    player.velocityY > 0
+                ) {
+                    player.jump();
+                }
+            });
+            
+            // Коллизии с предметами
+            items.forEach((item, index) => {
+                if (
+                    !item.collected &&
+                    player.x + player.width > item.x &&
+                    player.x < item.x + item.width &&
+                    player.y + player.height > item.y &&
+                    player.y < item.y + item.height
+                ) {
+                    item.collected = true;
+                    quotaValue += item.value;
+                    quotaDisplay.textContent = quotaValue;
+                    
+                    // Удаляем предмет через 0.1с для анимации
+                    setTimeout(() => {
+                        items.splice(index, 1);
+                    }, 100);
+                }
+            });
+            
+            // Коллизии с монстрами
+            monsters.forEach(monster => {
+                if (
+                    player.x + player.width > monster.x &&
+                    player.x < monster.x + monster.width &&
+                    player.y + player.height > monster.y &&
+                    player.y < monster.y + monster.height
+                ) {
+                    gameOver();
+                }
+            });
+        }
+        
+        // Генерация новых платформ
+        function generatePlatforms() {
+            // Генерируем платформы выше текущей позиции игрока
+            while (platforms.length < 15) {
+                const y = highestPoint - Math.random() * 200 - 100;
+                const x = Math.random() * (canvasWidth - 70);
+                platforms.push(new Platform(x, y));
+                
+                // Добавляем предметы на некоторые платформы
+                if (Math.random() > 0.6) {
+                    items.push(new Item(x + 25, y - 30));
+                }
+                
+                // Иногда добавляем монстров
+                if (Math.random() > 0.8) {
+                    const monsterType = Math.random() > 0.5 ? 'grandpa' : 'duck';
+                    monsters.push(new Monster(monsterType, Math.random() * (canvasWidth - 40), y - 100));
+                }
+            }
+        }
+        
+        // Очистка вышедших за пределы объектов
+        function cleanUpObjects() {
+            // Удаляем платформы ниже экрана
+            platforms = platforms.filter(platform => platform.y < canvasHeight + cameraOffset + 100);
+            
+            // Удаляем монстров ниже экрана
+            monsters = monsters.filter(monster => monster.y < canvasHeight + cameraOffset + 100);
+            
+            // Удаляем собранные предметы
+            items = items.filter(item => !item.collected);
+        }
+        
+        // Игровой цикл
+        function gameLoop() {
+            if (!gameRunning || gamePaused) return;
+            
+            // Очищаем canvas
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Рисуем фон
+            drawBackground();
+            
+            // Обновляем и рисуем объекты
+            player.update();
+            player.draw();
+            
+            platforms.forEach(platform => {
+                platform.draw();
+            });
+            
+            items.forEach(item => {
+                if (!item.collected) item.draw();
+            });
+            
+            monsters.forEach(monster => {
+                monster.update();
+                monster.draw();
+            });
+            
+            // Проверяем коллизии
+            checkCollisions();
+            
+            // Генерируем новые платформы
+            generatePlatforms();
+            
+            // Очищаем вышедшие за пределы объекты
+            cleanUpObjects();
+            
+            // Проверяем выполнение квоты
+            if (quotaValue >= 10000) {
+                gameOver(true);
+            }
+            
+            // Продолжаем игровой цикл
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Рисуем фон
+        function drawBackground() {
+            // Звездное небо
+            ctx.fillStyle = '#0c1a25';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // Звезды
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * canvasWidth;
+                const y = (Math.random() * canvasHeight * 2 + backgroundOffset) % (canvasHeight * 2);
+                const radius = Math.random() * 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            backgroundOffset += 0.1;
+            
+            // Земля внизу
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, canvasHeight - 20 - cameraOffset, canvasWidth, 20);
+            
+            // Окна зданий на заднем плане
+            ctx.fillStyle = 'rgba(255, 106, 0, 0.1)';
+            for (let i = 0; i < 20; i++) {
+                const x = Math.random() * canvasWidth;
+                const y = Math.random() * canvasHeight * 0.7 - cameraOffset * 0.3;
+                const width = 20 + Math.random() * 30;
+                const height = 30 + Math.random() * 50;
+                ctx.fillRect(x, y, width, height);
+                
+                // Окна
+                ctx.fillStyle = 'rgba(241, 196, 15, 0.3)';
+                for (let j = 0; j < 3; j++) {
+                    for (let k = 0; k < 2; k++) {
+                        ctx.fillRect(x + 5 + j * 10, y + 5 + k * 15, 5, 10);
+                    }
+                }
+                ctx.fillStyle = 'rgba(255, 106, 0, 0.1)';
+            }
+        }
+        
+        // Конец игры
+        function gameOver(win = false) {
+            gameRunning = false;
+            
+            // Рассчитываем процент выполнения квоты
+            const percent = Math.min(100, Math.floor((quotaValue / 10000) * 100));
+            
+            // Обновляем данные на экране завершения
+            finalScore.textContent = score;
+            quotaPercent.textContent = `${percent}%`;
+            
+            if (win) {
+                gameOverMessage.textContent = "Поздравляем! Вы выполнили квоту R.E.P.O. и выжили!";
+                gameOverMessage.style.color = "#2ecc71";
+            } else {
+                gameOverMessage.textContent = "Монстры R.E.P.O. оказались сильнее...";
+                gameOverMessage.style.color = "#e74c3c";
+            }
+            
+            // Показываем экран завершения
+            gameOverScreen.style.display = "flex";
+        }
+        
+        // Обработчики событий
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = "none";
+            gameRunning = true;
+            initGame();
+            gameLoop();
+        });
+        
+        restartGameBtn.addEventListener('click', () => {
+            gameOverScreen.style.display = "none";
+            gameRunning = true;
+            initGame();
+            gameLoop();
+        });
+        
+        restartBtn.addEventListener('click', () => {
+            if (gameOverScreen.style.display === "flex") {
+                gameOverScreen.style.display = "none";
+            }
+            gameRunning = true;
+            initGame();
+            gameLoop();
+        });
+        
+        pauseBtn.addEventListener('click', () => {
+            gamePaused = !gamePaused;
+            if (gamePaused) {
+                pauseBtn.innerHTML = '<i class="fas fa-play"></i> Продолжить';
+            } else {
+                pauseBtn.innerHTML = '<i class="fas fa-pause"></i> Пауза';
+                if (gameRunning) gameLoop();
+            }
+        });
+        
+        // Обработка клавиатуры
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'a') {
+                player.velocityX = -5;
+                player.direction = -1;
+            }
+            if (e.key === 'ArrowRight' || e.key === 'd') {
+                player.velocityX = 5;
+                player.direction = 1;
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+            
+            if ((e.key === 'ArrowLeft' || e.key === 'a') && !keys['ArrowRight'] && !keys['d']) {
+                player.velocityX = 0;
+            }
+            if ((e.key === 'ArrowRight' || e.key === 'd') && !keys['ArrowLeft'] && !keys['a']) {
+                player.velocityX = 0;
+            }
+        });
+        
+        // Обработка касаний для мобильных
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touchX = e.touches[0].clientX;
+            const diff = touchX - touchStartX;
+            
+            if (diff > 10) {
+                player.velocityX = 5; // Движение вправо
+                player.direction = 1;
+            } else if (diff < -10) {
+                player.velocityX = -5; // Движение влево
+                player.direction = -1;
+            }
+            
+            touchStartX = touchX;
+        });
+        
+        canvas.addEventListener('touchend', () => {
+            player.velocityX = 0;
+        });
+        
+        // Адаптация под размер экрана
+        function resizeCanvas() {
+            const maxWidth = Math.min(window.innerWidth * 0.95, 800);
+            const maxHeight = Math.min((window.innerHeight - 150) * 0.7, 600);
+            
+            // Сохраняем пропорции 9:16
+            const widthBasedOnHeight = maxHeight * (9/16);
+            const heightBasedOnWidth = maxWidth * (16/9);
+            
+            if (widthBasedOnHeight <= maxWidth) {
+                canvas.width = widthBasedOnHeight;
+                canvas.height = maxHeight;
+            } else {
+                canvas.width = maxWidth;
+                canvas.height = heightBasedOnWidth;
+            }
+            
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
+            
+            if (gameRunning) {
+                // Обновляем позицию игрока при изменении размера
+                player.x = canvasWidth / 2 - player.width / 2;
+            }
+        }
+        
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        });
+    </script>
+</body>
+</html>

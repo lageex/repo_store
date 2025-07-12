@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Арканоид R.E.P.O. | Официальный магазин</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-bg: #0d0d0d;
+            --secondary-bg: #1a1a1a;
+            --accent: #ff6a00;
+            --accent-light: #ff8c00;
+            --accent-dark: #cc5500;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --arkanoid-yellow: #f1c40f;
+            --arkanoid-red: #e74c3c;
+            --arkanoid-blue: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: var(--main-bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 106, 0, 0.03) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 106, 0, 0.03) 0%, transparent 20%);
+            background-attachment: fixed;
+        }
+        
+        /* HEADER */
+        header {
+            background: rgba(13, 13, 13, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(255, 106, 0, 0.3);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+        }
+        
+        .logo-img {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 32px;
+            box-shadow: 0 0 15px var(--accent);
+            color: #000;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-img:hover {
+            transform: scale(1.1);
+        }
+        
+        .rusty-logo {
+            position: relative;
+            display: inline-block;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--accent);
+        }
+        
+        .rusty-logo::before {
+            content: 'R.E.P.O.';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            overflow: hidden;
+            color: var(--accent);
+            background: linear-gradient(45deg, 
+                var(--accent-dark), 
+                var(--accent-light), 
+                #e74c3c, 
+                var(--accent-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .rusty-logo::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,255,255,0.8), 
+                transparent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: var(--accent);
+        }
+        
+        nav a.active {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent);
+        }
+        
+        .back-button {
+            background: var(--arkanoid-yellow);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--arkanoid-yellow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        /* GAME CONTAINER */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(241, 196, 15, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(241, 196, 15, 0.05) 0%, transparent 30%);
+            z-index: -1;
+        }
+        
+        .game-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--arkanoid-yellow);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px var(--arkanoid-yellow);
+            position: relative;
+        }
+        
+        .game-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: var(--arkanoid-yellow);
+            border-radius: 3px;
+        }
+        
+        .game-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        .game-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        /* GAME BOARD */
+        .game-board-container {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            border: 3px solid var(--arkanoid-yellow);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--secondary-bg);
+            box-shadow: 0 0 30px rgba(241, 196, 15, 0.3);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* GAME INFO */
+        .game-info-panel {
+            background: rgba(26, 26, 26, 0.7);
+            border: 2px solid var(--arkanoid-yellow);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.2);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            min-width: 250px;
+        }
+        
+        .info-title {
+            font-size: 1.5rem;
+            color: var(--arkanoid-yellow);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-value {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+        
+        .highscore-value {
+            color: var(--arkanoid-yellow);
+            text-shadow: 0 0 10px var(--arkanoid-yellow);
+        }
+        
+        /* CONTROLS */
+        .controls-panel {
+            background: rgba(26, 26, 26, 0.7);
+            border: 2px solid var(--arkanoid-yellow);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.2);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-width: 250px;
+        }
+        
+        .controls-title {
+            font-size: 1.5rem;
+            color: var(--arkanoid-yellow);
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .controls-list {
+            list-style: none;
+        }
+        
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-key {
+            background: var(--secondary-bg);
+            color: var(--accent);
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            border: 1px solid var(--accent);
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            background: var(--arkanoid-yellow);
+            color: #000;
+            border: none;
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--arkanoid-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        /* GAME OVER */
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .game-over.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .game-over h2 {
+            font-size: 2.5rem;
+            color: var(--danger);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px var(--danger);
+            text-transform: uppercase;
+        }
+        
+        .game-over p {
+            font-size: 1.5rem;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+        
+        .score-display {
+            font-size: 2rem;
+            color: var(--arkanoid-yellow);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 15px var(--arkanoid-yellow);
+        }
+        
+        .highscore-display {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .restart-button {
+            background: var(--arkanoid-yellow);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--arkanoid-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 250px;
+        }
+        
+        .restart-button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 25px var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        /* START SCREEN */
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+        
+        .start-screen h2 {
+            font-size: 2.5rem;
+            color: var(--arkanoid-yellow);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px var(--arkanoid-yellow);
+            text-transform: uppercase;
+        }
+        
+        .start-button {
+            background: var(--arkanoid-yellow);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px var(--arkanoid-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .start-button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 25px var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        /* MOBILE CONTROLS */
+        .mobile-controls {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 1rem;
+            gap: 10px;
+        }
+        
+        .mobile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--arkanoid-yellow);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+        
+        .mobile-btn:active {
+            background: var(--arkanoid-yellow);
+            color: #000;
+            transform: scale(0.98);
+        }
+        
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 992px) {
+            .game-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-board-container {
+                width: 500px;
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .game-subtitle {
+                font-size: 1rem;
+            }
+            
+            .game-board-container {
+                width: 400px;
+                height: 300px;
+            }
+            
+            .mobile-controls {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .game-board-container {
+                width: 320px;
+                height: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <a href="index.html" class="logo">
+            <div class="logo-img">😈</div>
+            <div class="rusty-logo">R.E.P.O.</div>
+        </a>
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="games.html">Игры</a></li>
+                <li><a href="purchases.html">Корзина</a></li>
+            </ul>
+        </nav>
+        <button class="back-button" onclick="window.location.href='games.html'">
+            <i class="fas fa-arrow-left"></i> Назад
+        </button>
+    </header>
+
+    <!-- GAME CONTAINER -->
+    <section class="game-container">
+        <h1 class="game-title">Арканоид R.E.P.O.</h1>
+        <p class="game-subtitle">Разбей все блоки и выполни квоту! Осторожно - мяч ускоряется!</p>
+        
+        <div class="game-content">
+            <!-- GAME BOARD -->
+            <div class="game-board-container">
+                <canvas id="gameCanvas"></canvas>
+                
+                <!-- START SCREEN -->
+                <div class="start-screen" id="startScreen">
+                    <h2>Арканоид R.E.P.O.</h2>
+                    <button class="start-button" id="startButton">
+                        <i class="fas fa-play"></i> Начать игру
+                    </button>
+                </div>
+                
+                <!-- GAME OVER SCREEN -->
+                <div class="game-over" id="gameOver">
+                    <h2 id="resultTitle">ИГРА ОКОНЧЕНА</h2>
+                    <p class="score-display" id="finalScore">0</p>
+                    <p class="highscore-display">Рекорд: <span id="highscoreDisplay">0</span></p>
+                    <button class="restart-button" id="restartButton">
+                        <i class="fas fa-redo"></i> Играть снова
+                    </button>
+                </div>
+            </div>
+            
+            <!-- GAME INFO -->
+            <div class="game-info-panel">
+                <h3 class="info-title">Счёт</h3>
+                <div class="info-value" id="scoreDisplay">0</div>
+                
+                <h3 class="info-title">Рекорд</h3>
+                <div class="info-value highscore-value" id="highscoreValue">0</div>
+                
+                <h3 class="info-title">Уровень</h3>
+                <div class="info-value" id="levelDisplay">1</div>
+            </div>
+            
+            <!-- CONTROLS -->
+            <div class="controls-panel">
+                <h3 class="controls-title">Управление</h3>
+                <ul class="controls-list">
+                    <li class="control-item">
+                        <span>Влево</span>
+                        <span class="control-key">←</span>
+                    </li>
+                    <li class="control-item">
+                        <span>Вправо</span>
+                        <span class="control-key">→</span>
+                    </li>
+                    <li class="control-item">
+                        <span>Пауза</span>
+                        <span class="control-key">P</span>
+                    </li>
+                </ul>
+                
+                <div class="action-buttons">
+                    <button class="action-btn" id="newGameBtn">
+                        <i class="fas fa-plus-circle"></i> Новая игра
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MOBILE CONTROLS -->
+        <div class="mobile-controls">
+            <div class="mobile-btn" id="leftBtn">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+            <div class="mobile-btn" id="rightBtn">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game elements
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const highscoreValue = document.getElementById('highscoreValue');
+            const highscoreDisplay = document.getElementById('highscoreDisplay');
+            const levelDisplay = document.getElementById('levelDisplay');
+            const finalScore = document.getElementById('finalScore');
+            const startScreen = document.getElementById('startScreen');
+            const startButton = document.getElementById('startButton');
+            const gameOverScreen = document.getElementById('gameOver');
+            const restartButton = document.getElementById('restartButton');
+            const newGameBtn = document.getElementById('newGameBtn');
+            const leftBtn = document.getElementById('leftBtn');
+            const rightBtn = document.getElementById('rightBtn');
+            const resultTitle = document.getElementById('resultTitle');
+        
+            // Game variables
+            const PADDLE_WIDTH = 100;
+            const PADDLE_HEIGHT = 15;
+            const BALL_RADIUS = 8;
+            const BRICK_WIDTH = 60;
+            const BRICK_HEIGHT = 20;
+            const BRICK_PADDING = 10;
+            const BRICK_OFFSET_TOP = 60;
+            const BRICK_OFFSET_LEFT = 30;
+            const BRICK_ROWS = 5;
+            const BRICK_COLS = 8;
+            
+            let paddleX = (canvas.width - PADDLE_WIDTH) / 2;
+            let ballX = canvas.width / 2;
+            let ballY = canvas.height - 30;
+            let ballSpeedX = 4;
+            let ballSpeedY = -4;
+            let score = 0;
+            let highscore = 0;
+            let level = 1;
+            let lives = 3;
+            let gameRunning = false;
+            let gameOver = false;
+            let isPaused = false;
+            let animationId;
+            let bricks = [];
+            let leftPressed = false;
+            let rightPressed = false;
+            
+            // Colors
+            const BRICK_COLORS = [
+                '#f1c40f', '#e67e22', '#e74c3c', 
+                '#9b59b6', '#3498db', '#2ecc71'
+            ];
+            
+            // Initialize canvas
+            function resizeCanvas() {
+                const container = document.querySelector('.game-board-container');
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                resetBallAndPaddle();
+                initBricks();
+            }
+            
+            // Initialize bricks
+            function initBricks() {
+                bricks = [];
+                for (let c = 0; c < BRICK_COLS; c++) {
+                    bricks[c] = [];
+                    for (let r = 0; r < BRICK_ROWS; r++) {
+                        const brickX = c * (BRICK_WIDTH + BRICK_PADDING) + BRICK_OFFSET_LEFT;
+                        const brickY = r * (BRICK_HEIGHT + BRICK_PADDING) + BRICK_OFFSET_TOP;
+                        bricks[c][r] = { 
+                            x: brickX, 
+                            y: brickY, 
+                            status: 1,
+                            color: BRICK_COLORS[r % BRICK_COLORS.length]
+                        };
+                    }
+                }
+            }
+            
+            // Reset ball and paddle
+            function resetBallAndPaddle() {
+                paddleX = (canvas.width - PADDLE_WIDTH) / 2;
+                ballX = canvas.width / 2;
+                ballY = canvas.height - 30;
+                ballSpeedX = 4;
+                ballSpeedY = -4;
+            }
+            
+            // Draw paddle
+            function drawPaddle() {
+                ctx.beginPath();
+                ctx.roundRect(paddleX, canvas.height - PADDLE_HEIGHT, PADDLE_WIDTH, PADDLE_HEIGHT, 10);
+                ctx.fillStyle = '#f1c40f';
+                ctx.fill();
+                ctx.closePath();
+            }
+            
+            // Draw ball
+            function drawBall() {
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, BALL_RADIUS, 0, Math.PI * 2);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fill();
+                ctx.closePath();
+            }
+            
+            // Draw bricks
+            function drawBricks() {
+                for (let c = 0; c < BRICK_COLS; c++) {
+                    for (let r = 0; r < BRICK_ROWS; r++) {
+                        if (bricks[c][r].status === 1) {
+                            const brick = bricks[c][r];
+                            ctx.beginPath();
+                            ctx.roundRect(brick.x, brick.y, BRICK_WIDTH, BRICK_HEIGHT, 5);
+                            ctx.fillStyle = brick.color;
+                            ctx.fill();
+                            ctx.strokeStyle = '#000';
+                            ctx.stroke();
+                            ctx.closePath();
+                        }
+                    }
+                }
+            }
+            
+            // Collision detection
+            function collisionDetection() {
+                for (let c = 0; c < BRICK_COLS; c++) {
+                    for (let r = 0; r < BRICK_ROWS; r++) {
+                        const brick = bricks[c][r];
+                        if (brick.status === 1) {
+                            if (
+                                ballX > brick.x && 
+                                ballX < brick.x + BRICK_WIDTH && 
+                                ballY > brick.y && 
+                                ballY < brick.y + BRICK_HEIGHT
+                            ) {
+                                ballSpeedY = -ballSpeedY;
+                                brick.status = 0;
+                                score += 10;
+                                scoreDisplay.textContent = score;
+                                
+                                if (checkLevelComplete()) {
+                                    levelUp();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Check if level is complete
+            function checkLevelComplete() {
+                for (let c = 0; c < BRICK_COLS; c++) {
+                    for (let r = 0; r < BRICK_ROWS; r++) {
+                        if (bricks[c][r].status === 1) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            // Level up
+            function levelUp() {
+                level++;
+                levelDisplay.textContent = level;
+                ballSpeedX *= 1.1;
+                ballSpeedY *= 1.1;
+                initBricks();
+                resetBallAndPaddle();
+            }
+            
+            // Game over
+            function endGame() {
+                gameRunning = false;
+                gameOver = true;
+                cancelAnimationFrame(animationId);
+                
+                if (score > highscore) {
+                    highscore = score;
+                    highscoreValue.textContent = highscore;
+                    highscoreDisplay.textContent = highscore;
+                    localStorage.setItem('arkanoidHighscore', highscore);
+                }
+                
+                finalScore.textContent = score;
+                resultTitle.textContent = lives > 0 ? 'УРОВЕНЬ ПРОЙДЕН!' : 'ИГРА ОКОНЧЕНА';
+                gameOverScreen.classList.add('active');
+            }
+            
+            // Update paddle position
+            function updatePaddle() {
+                if (rightPressed && paddleX < canvas.width - PADDLE_WIDTH) {
+                    paddleX += 7;
+                } else if (leftPressed && paddleX > 0) {
+                    paddleX -= 7;
+                }
+            }
+        
+            // Main game loop
+            function gameLoop() {
+                if (!gameRunning || isPaused) return;
+                
+                updatePaddle(); // Обновляем позицию платформы
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawBricks();
+                drawPaddle();
+                drawBall();
+                collisionDetection();
+                
+                ballX += ballSpeedX;
+                ballY += ballSpeedY;
+                
+                // Wall collision (left/right)
+                if (ballX + ballSpeedX > canvas.width - BALL_RADIUS || ballX + ballSpeedX < BALL_RADIUS) {
+                    ballSpeedX = -ballSpeedX;
+                }
+                
+                // Wall collision (top)
+                if (ballY + ballSpeedY < BALL_RADIUS) {
+                    ballSpeedY = -ballSpeedY;
+                }
+                
+                // Paddle collision
+                if (
+                    ballY + ballSpeedY > canvas.height - BALL_RADIUS - PADDLE_HEIGHT &&
+                    ballX > paddleX && 
+                    ballX < paddleX + PADDLE_WIDTH
+                ) {
+                    const hitPosition = (ballX - (paddleX + PADDLE_WIDTH / 2)) / (PADDLE_WIDTH / 2);
+                    ballSpeedX = hitPosition * 5;
+                    ballSpeedY = -Math.abs(ballSpeedY);
+                }
+                
+                // Bottom wall (lose life)
+                if (ballY + ballSpeedY > canvas.height - BALL_RADIUS) {
+                    lives--;
+                    if (lives <= 0) {
+                        endGame();
+                        return;
+                    } else {
+                        resetBallAndPaddle();
+                    }
+                }
+                
+                animationId = requestAnimationFrame(gameLoop);
+            }
+            
+            // Start game
+            function startGame() {
+                score = 0;
+                lives = 3;
+                level = 1;
+                gameRunning = true;
+                gameOver = false;
+                isPaused = false;
+                
+                scoreDisplay.textContent = score;
+                levelDisplay.textContent = level;
+                startScreen.style.display = 'none';
+                gameOverScreen.classList.remove('active');
+                
+                initBricks();
+                resetBallAndPaddle();
+                
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+                gameLoop();
+            }
+            
+            // Initialize game
+            function init() {
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                // Load highscore
+                highscore = localStorage.getItem('arkanoidHighscore') || 0;
+                highscoreValue.textContent = highscore;
+                highscoreDisplay.textContent = highscore;
+                
+                // Event listeners
+                startButton.addEventListener('click', startGame);
+                restartButton.addEventListener('click', startGame);
+                newGameBtn.addEventListener('click', startGame);
+                
+                // Mobile buttons
+                leftBtn.addEventListener('mousedown', () => leftPressed = true);
+                leftBtn.addEventListener('mouseup', () => leftPressed = false);
+                leftBtn.addEventListener('touchstart', () => leftPressed = true);
+                leftBtn.addEventListener('touchend', () => leftPressed = false);
+                
+                rightBtn.addEventListener('mousedown', () => rightPressed = true);
+                rightBtn.addEventListener('mouseup', () => rightPressed = false);
+                rightBtn.addEventListener('touchstart', () => rightPressed = true);
+                rightBtn.addEventListener('touchend', () => rightPressed = false);
+                
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight') rightPressed = true;
+                    else if (e.key === 'ArrowLeft') leftPressed = true;
+                    else if (e.key === 'p' || e.key === 'P') isPaused = !isPaused;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    if (e.key === 'ArrowRight') rightPressed = false;
+                    else if (e.key === 'ArrowLeft') leftPressed = false;
+                });
+                
+                // Mouse controls
+                canvas.addEventListener('mousemove', (e) => {
+                    const relativeX = e.clientX - canvas.offsetLeft;
+                    if (relativeX > 0 && relativeX < canvas.width) {
+                        paddleX = relativeX - PADDLE_WIDTH / 2;
+                        paddleX = Math.max(0, Math.min(paddleX, canvas.width - PADDLE_WIDTH));
+                    }
+                });
+                
+                // Draw initial screen
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#f1c40f';
+                ctx.font = 'bold 36px Rajdhani';
+                ctx.textAlign = 'center';
+                ctx.fillText('АРКАНОИД R.E.P.O.', canvas.width / 2, canvas.height / 2 - 30);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '18px Rajdhani';
+                ctx.fillText('Нажмите "Начать игру"', canvas.width / 2, canvas.height / 2 + 20);
+            }
+            
+            init();
+        });
+        </script>
+</body>
+</html>
